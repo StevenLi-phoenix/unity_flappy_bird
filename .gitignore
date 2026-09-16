@@ -6,6 +6,12 @@
 # See: https://github.com/github/gitignore/tree/main/Global
 #
 .utmp/
+
+# Local credentials: never commit secret values or their backups.
+/.secret/
+.env
+.env.*
+!.env.example
 /[Ll]ibrary/
 /[Tt]emp/
 /[Oo]bj/
