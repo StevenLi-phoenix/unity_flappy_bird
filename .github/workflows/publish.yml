@@ -1,0 +1,63 @@
+name: WebGL to itch.io
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: itch-production
+  cancel-in-progress: false
+jobs:
+  build:
+    # Enable only after the dedicated licensed runner has been registered.
+    # Never run pull-request code on the persistent Unity host.
+    if: github.ref == 'refs/heads/main' && vars.UNITY_LOCAL_RUNNER == 'true'
+    runs-on: [self-hosted, macOS, ARM64, flappy-unity]
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node --test scripts/*.test.mjs
+      - run: bash scripts/build-webgl.sh
+      - uses: actions/upload-artifact@v4
+        with:
+          name: webgl-${{ github.sha }}
+          path: FlappyBird/Build/WebGL
+          if-no-files-found: error
+          retention-days: 14
+  publish:
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment:
+      name: itch-production
+      url: https://stevenli-phoenix-work.itch.io/flappy-bird
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: webgl-${{ github.sha }}
+          path: webgl
+      - name: Install official butler
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --fail --silent --show-error --location --retry 3 \
+            https://broth.itch.zone/butler/linux-amd64/15.31.0/archive/default -o "$RUNNER_TEMP/butler.zip"
+          unzip -q "$RUNNER_TEMP/butler.zip" -d "$RUNNER_TEMP/butler"
+          chmod +x "$RUNNER_TEMP/butler/butler"
+          "$RUNNER_TEMP/butler/butler" version
+      - name: Publish browser channel
+        shell: bash
+        env:
+          BUTLER_API_KEY: ${{ secrets.BUTLER_API_KEY }}
+        run: |
+          set -euo pipefail
+          test -n "$BUTLER_API_KEY" || { echo 'Missing BUTLER_API_KEY repository secret'; exit 1; }
+          test -f webgl/index.html
+          "$RUNNER_TEMP/butler/butler" push webgl stevenli-phoenix-work/flappy-bird:html5 --userversion "$GITHUB_SHA"
+          "$RUNNER_TEMP/butler/butler" status stevenli-phoenix-work/flappy-bird:html5
