@@ -44,7 +44,9 @@ Verified: local WebGL 2 build passes 99 Unity checks; 4 Node validator tests pas
 
 Cloud activation requires repository secrets `UNITY_LICENSE`, `UNITY_EMAIL`, `UNITY_PASSWORD` per GameCI's current Personal-license instructions. No `.ulf` was found in either standard local Unity directory. The workflow fails early with the missing secret name instead of silently skipping deployment. The user must supply these directly in GitHub, never in chat. Pro or license-server activation needs the corresponding workflow adjustment.
 
-Security follow-up: the first butler OAuth callback placed its token in the browser tab title; a later native state capture inadvertently exposed it. The user was informed. Rotate that token and replace `BUTLER_API_KEY` before enabling automatic publication. Do not display API-key settings or callback state without redacting token strings and URLs first. Keep the token out of documentation and git.
+Security follow-up: the first butler OAuth callback placed its token in the browser tab title; a later native state capture inadvertently exposed it. The user was informed and the GitHub `BUTLER_API_KEY` secret was removed. The user must revoke that approximately 22:49 wharf token in itch.io and replace the secret with a fresh token before automatic publication can work. Do not display API-key settings or callback state without redacting token strings and URLs first. Keep the token out of documentation and git.
+
+Final verification: public itch.io build loaded and accepted gameplay input from the separate personal Chrome profile. Cloud CI run 35049831091 passed; publish run 35049831092 failed at the credential preflight because `UNITY_LICENSE` is missing. No self-hosted runner was installed. Automatic rebuild/publish is configured but has not completed an end-to-end cloud run.
 
 After credentials are configured, dispatch the WebGL workflow or push a real commit and verify both GitHub build/publish jobs, the butler channel version (commit SHA), and the live itch.io game. Do not report auto-update as working until that round trip succeeds.
 
