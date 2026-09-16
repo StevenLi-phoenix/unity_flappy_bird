@@ -50,9 +50,19 @@ Final verification: public itch.io build loaded and accepted gameplay input from
 
 After credentials are configured, dispatch the WebGL workflow or push a real commit and verify both GitHub build/publish jobs, the butler channel version (commit SHA), and the live itch.io game. Do not report auto-update as working until that round trip succeeds.
 
+### License investigation update (2026-09-16)
+
+`UNITY_EMAIL` is now configured from the signed-in Unity Hub account. A fresh GitHub secret-name check shows only that secret; `UNITY_PASSWORD`, `UNITY_LICENSE`, and the replacement `BUTLER_API_KEY` remain absent. Never inspect secret values to verify configuration.
+
+With the user's explicit eligibility and terms approval, Hub's Add license → Get free Personal → Agree flow was completed. It returned to the Personal license list, but still did not create a `.ulf` in the standard Unity locations. The available license is `~/Library/Unity/licenses/UnityEntitlementLicense.xml`; do not rename or submit that XML as a legacy ULF. The Add-license workaround in GameCI issue 469 has already been tried here and did not resolve the problem. Repeating it without new evidence is not progress.
+
+The user does not know the Unity password. Account recovery or password creation must be completed by the user through Unity's account interface, with the result entered directly into GitHub Secrets. Browser tool policy likewise requires user handoff for credential changes, including replacement of the exposed butler credential. A recovered password alone does not resolve the missing ULF: cloud activation still needs a supported licensing path before an end-to-end build can be verified.
+
 ## References
 
 - https://itch.io/docs/creators/html5
 - https://itch.io/docs/butler/pushing.html
 - https://itch.io/docs/butler/login.html
 - https://game.ci/docs/github/builder/
+- https://game.ci/docs/github/activation/
+- https://github.com/game-ci/documentation/issues/469
