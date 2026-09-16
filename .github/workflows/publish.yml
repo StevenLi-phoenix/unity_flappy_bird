@@ -10,10 +10,8 @@ concurrency:
   cancel-in-progress: false
 jobs:
   build:
-    # Enable only after the dedicated licensed runner has been registered.
-    # Never run pull-request code on the persistent Unity host.
-    if: github.ref == 'refs/heads/main' && vars.UNITY_LOCAL_RUNNER == 'true'
-    runs-on: [self-hosted, macOS, ARM64, flappy-unity]
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
     timeout-minutes: 45
     steps:
       - uses: actions/checkout@v4
@@ -23,7 +21,34 @@ jobs:
         with:
           node-version: '22'
       - run: node --test scripts/*.test.mjs
-      - run: bash scripts/build-webgl.sh
+      - name: Check Unity CI credentials
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+        run: |
+          set -euo pipefail
+          for name in UNITY_LICENSE UNITY_EMAIL UNITY_PASSWORD; do
+            test -n "${!name}" || { echo "Missing repository secret: $name. See docs/HANDOFF.md"; exit 1; }
+          done
+      - uses: actions/cache@v4
+        with:
+          path: FlappyBird/Library
+          key: unity-webgl-${{ hashFiles('FlappyBird/ProjectSettings/ProjectVersion.txt', 'FlappyBird/Packages/packages-lock.json') }}-${{ github.sha }}
+          restore-keys: |
+            unity-webgl-${{ hashFiles('FlappyBird/ProjectSettings/ProjectVersion.txt', 'FlappyBird/Packages/packages-lock.json') }}-
+      - uses: game-ci/unity-builder@v4
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+        with:
+          projectPath: FlappyBird
+          unityVersion: 6000.6.0f1
+          targetPlatform: WebGL
+          buildMethod: BuildGame.BuildWebGL
+          versioning: None
+      - run: node scripts/check-webgl.mjs
       - uses: actions/upload-artifact@v4
         with:
           name: webgl-${{ github.sha }}

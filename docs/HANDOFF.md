@@ -38,11 +38,15 @@ Never print butler credentials, GitHub tokens or Unity license contents. Transfe
 
 ## Setup status (2026-09-15)
 
-Verified: local WebGL 2 build passes 99 Unity checks; 4 Node validator tests pass; 13.3 MiB bundle renders and starts in Chrome. itch.io draft exists and description is saved. Initial cover upload did not complete through the native picker. Game upload and public visibility are not yet verified.
+Verified: local WebGL 2 build passes 99 Unity checks; 4 Node validator tests pass; 13.3 MiB bundle renders and starts in Chrome. itch.io game and cover are uploaded; public page is accessible from the separate personal profile. Description, 1100×660 embed and fullscreen settings are saved. Initial butler upload uses version `initial-webgl` on `html5`.
 
-`ci.yml` runs on pushes/PRs. `publish.yml` is prepared for a dedicated licensed Apple Silicon runner labelled `flappy-unity`, followed by an isolated GitHub-hosted butler deployment job. It is intentionally gated by repository variable `UNITY_LOCAL_RUNNER=true` until the user confirms using this Mac and the runner is installed. The repository currently has no Actions secrets or runners. Never enable the gate before registering the runner and adding `BUTLER_API_KEY`.
+`ci.yml` runs on pushes/PRs. First GitHub CI run 35049646385 passed. The user explicitly rejected a local persistent runner: do not install one. `publish.yml` builds on GitHub-hosted Ubuntu with GameCI, then deploys the artifact from another hosted job using butler 15.31.0. Exact image `unityci/editor:ubuntu-6000.6.0f1-webgl-3` was verified available. Publication only runs from main; no persistent machine receives PR code.
 
-Pending user confirmation: local Mac runner versus cloud Unity credentials; butler OAuth `wharf` authorization and storage in the repository Actions Secret. These are distinct from successful local build checks. After setup, push a real commit and verify both GitHub build/publish jobs and the public itch.io game. Do not report auto-update as working until that round trip succeeds.
+Cloud activation requires repository secrets `UNITY_LICENSE`, `UNITY_EMAIL`, `UNITY_PASSWORD` per GameCI's current Personal-license instructions. No `.ulf` was found in either standard local Unity directory. The workflow fails early with the missing secret name instead of silently skipping deployment. The user must supply these directly in GitHub, never in chat. Pro or license-server activation needs the corresponding workflow adjustment.
+
+Security follow-up: the first butler OAuth callback placed its token in the browser tab title; a later native state capture inadvertently exposed it. The user was informed. Rotate that token and replace `BUTLER_API_KEY` before enabling automatic publication. Do not display API-key settings or callback state without redacting token strings and URLs first. Keep the token out of documentation and git.
+
+After credentials are configured, dispatch the WebGL workflow or push a real commit and verify both GitHub build/publish jobs, the butler channel version (commit SHA), and the live itch.io game. Do not report auto-update as working until that round trip succeeds.
 
 ## References
 
