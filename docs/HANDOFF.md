@@ -52,11 +52,13 @@ After credentials are configured, dispatch the WebGL workflow or push a real com
 
 ### License investigation update (2026-09-16)
 
-`UNITY_EMAIL` is now configured from the signed-in Unity Hub account. A fresh GitHub secret-name check shows only that secret; `UNITY_PASSWORD`, `UNITY_LICENSE`, and the replacement `BUTLER_API_KEY` remain absent. Never inspect secret values to verify configuration.
+`UNITY_EMAIL`, `UNITY_PASSWORD`, and `UNITY_LICENSE` are now configured. The password was supplied by the user and transferred without printing it. The replacement `BUTLER_API_KEY` is still pending. Never inspect secret values to verify configuration.
 
 With the user's explicit eligibility and terms approval, Hub's Add license → Get free Personal → Agree flow was completed. It returned to the Personal license list, but still did not create a `.ulf` in the standard Unity locations. The available license is `~/Library/Unity/licenses/UnityEntitlementLicense.xml`; do not rename or submit that XML as a legacy ULF. The Add-license workaround in GameCI issue 469 has already been tried here and did not resolve the problem. Repeating it without new evidence is not progress.
 
-The user does not know the Unity password. Account recovery or password creation must be completed by the user through Unity's account interface, with the result entered directly into GitHub Secrets. Browser tool policy likewise requires user handoff for credential changes, including replacement of the exposed butler credential. A recovered password alone does not resolve the missing ULF: cloud activation still needs a supported licensing path before an end-to-end build can be verified.
+Later, the official Unity CLI 1.0.0-beta.9 reported the existing account signed in and Personal (ULF) active. A fresh filesystem check found `/Library/Application Support/Unity/Unity_lic.ulf`; it was transferred directly to GitHub Secret stdin without displaying its contents. The exact cause of the delayed file appearance is unverified. Do not preserve the earlier missing-file observation as current state.
+
+Cloud run `35062603914` passed credential preflight, logged successful Unity activation, and passed all 99 Unity checks. At the latest observation it was still generating the WebGL build after shader compilation; successful activation and tests do not prove artifact or deployment success. The cloud build and subsequent deployment still require verification. Browser tool policy requires user handoff for credential changes, including replacement of the exposed butler credential. Official butler documentation explicitly says local logout does not revoke a compromised key; revocation uses itch.io's API keys settings page.
 
 ## References
 
