@@ -1,4 +1,4 @@
-![](./FlappyBird/screenshot.png)
+[![](./FlappyBird/screenshot.png)](https://stevenli-phoenix-work.itch.io/flappy-bird)
 
 # Flappy Bird — Pocket Arcade
 
