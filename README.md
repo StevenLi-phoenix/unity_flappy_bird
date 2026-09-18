@@ -1,5 +1,4 @@
-<iframe frameborder="0" src="https://itch.io/embed-upload/19259066?color=333333" allowfullscreen="" width="1100" height="680"><a href="https://stevenli-phoenix-work.itch.io/flappy-bird">Play Flappy Bird — Pocket Arcade on itch.io</a></iframe>
-// ![](./FlappyBird/screenshot.png)]
+[![](./FlappyBird/screenshot.png)](https://stevenli-phoenix-work.itch.io/flappy-bird)
 
 # Flappy Bird — Pocket Arcade
 
